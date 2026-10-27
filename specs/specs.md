@@ -103,4 +103,4 @@ Per video, per class:
 - Containerized with Docker
 - Environment variables via .env
 - Dependencies managed with uv
-- Python 3.11+
+- Python 3.13
