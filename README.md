@@ -41,7 +41,7 @@ brand-detection/
 ├── docs/
 │   ├── specs.md
 │   ├── architecture.md
-│   └── results.md
+│   └── train.md
 ├── .env.example
 ├── .gitignore
 ├── Dockerfile
