@@ -42,7 +42,8 @@ brand-detection/
 │   └── crops/            
 ├── docs/
 │   ├── specs.md
-│   └── architecture.md
+│   ├── architecture.md
+│   └── training.md
 ├── .env.example
 ├── .gitignore
 ├── Dockerfile

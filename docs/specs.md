@@ -13,9 +13,9 @@ by retraining with additional classes.
 
 ## Dataset
 
-- Images: 114, annotations: 275, classes: 2 (oreo_cooki, oreo_logo)
-- oreo_cookie: 114 train / 21 val / 23 test (158 annotations total)
-- oreo_logo: 77 train / 20 val / 20 test (117 annotations total)
+- Images: 114, annotations: 275, classes: 2 (oreo-cookie, oreo-logo)
+- oreo-cookie: 114 train / 21 val / 23 test (158 annotations total)
+- oreo-logo: 77 train / 20 val / 20 test (117 annotations total)
 - Annotation type: polygon segmentation (Roboflow)
 - Augmentations: flip horizontal, rotation ±15°, brightness ±20%, blur up to 2px, noise up to 2%, multiplier: 5x
 - Export format: YOLOv8 segmentation

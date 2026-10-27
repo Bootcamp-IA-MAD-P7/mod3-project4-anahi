@@ -45,3 +45,7 @@ sample_images = list((DATASET_PATH / "test" / "images").glob("*.jpg"))[:5]
 
 for img in sample_images:
     model.predict(str(img), save=True, conf=0.25)
+
+# %%
+from google.colab import files
+files.download("/content/runs/segment/oreo/v1/weights/best.pt")
