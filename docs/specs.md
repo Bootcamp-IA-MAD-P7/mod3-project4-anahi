@@ -25,6 +25,7 @@ by retraining with additional classes.
 - Architecture: YOLOv8s-seg (ultralytics)
 - Pre-trained weights: yolov8s-seg.pt (COCO)
 - Fine-tuned on: Oreo dataset
+- Fine-tuned weights: In Hugging Face Hub, loaded via `YOLO("Anahia/yolov8s-seg-oreo")`, downloaded and cached on first run
 - Training environment: Google Colab (T4 GPU)
 - Epochs: 100
 - Early stopping patience: 10
@@ -90,6 +91,7 @@ Per video, per class:
 - Input: video file upload
 - Output: report displayed in UI, crops shown per interval
 - Deployment: Google Colab with share=True for demo
+- MVP deployment targets: Google Colab (public demo) + local Docker with Gradio
 
 ## Delivery Levels Targeted
 
@@ -101,6 +103,7 @@ Per video, per class:
 ## Infrastructure
 
 - Containerized with Docker
+- Model weights pulled from Hugging Face Hub at startup, not baked into the image
 - Environment variables via .env
 - Dependencies managed with uv
 - Python 3.13

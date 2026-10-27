@@ -20,6 +20,7 @@ Built as a proof of concept for an advertising agency use case: given a video, i
 - Python 3.13
 - uv (dependency management)
 - YOLOv8s-seg (ultralytics)
+- Model weights: Hugging Face Hub (Anahia/yolov8s-seg-oreo, auto-downloaded on first run)
 - OpenCV
 - PostgreSQL via Supabase
 - Gradio
@@ -33,9 +34,6 @@ brand-detection/
 │   ├── database.py
 │   ├── report.py
 │   └── app.py
-├── models/
-│   └── weights/
-│       └── best.pt        
 ├── notebooks/
 │   └── train_oreo.py    # dataset download + training
 ├── outputs/
@@ -43,7 +41,7 @@ brand-detection/
 ├── docs/
 │   ├── specs.md
 │   ├── architecture.md
-│   └── training.md
+│   └── results.md
 ├── .env.example
 ├── .gitignore
 ├── Dockerfile
@@ -62,10 +60,10 @@ Fill in your Supabase credentials in .env before running anything.
 
 Training runs on Google Colab using a free T4 GPU.
 
-1. Open notebooks/train.py in Colab
+1. Open notebooks/train_oreo.py in Colab
 2. Run cells in order — dataset downloads from Roboflow, model trains, best.pt is saved
 3. Download best.pt from Colab
-4. Place it at models/weights/best.pt locally
+4. Upload best.pt to Hugging Face
 
 Training hyperparameters: epochs=100, patience=10 (early stopping), batch=16, image size=640.
 
@@ -77,11 +75,17 @@ Training hyperparameters: epochs=100, patience=10 (early stopping), batch=16, im
 
     docker-compose up
 
+The image does not include weights — they are downloaded from Hugging Face Hub on startup.
+
+## Deployment
+
+The MVP runs in two environments: Google Colab for the public Gradio demo (share=True) and local Docker with Gradio for development. Both load the same weights from Hugging Face Hub.
+
 ## Demo
 
 The Gradio interface runs on Google Colab with a public URL — no deployment needed.
 
-1. Open notebooks/train.py in Colab
+1. Open notebooks/train_oreo.py in Colab
 2. Skip to the demo section
 3. Run the Gradio cell — a public gradio.live URL is printed automatically
 4. Paste a video URL or upload a file, then view the detection report

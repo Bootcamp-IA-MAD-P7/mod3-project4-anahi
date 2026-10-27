@@ -52,10 +52,22 @@ The Gradio interface accepts both a video URL and a direct file upload. URL down
 (YouTube, Vimeo, Instagram, Twitter, etc.) without platform-specific code. File upload is included as a fallback for local files or platforms yt-dlp does not support. Both inputs feed the same inference pipeline — the URL
 path simply adds a download step before processing.
 
-## Training on Colab, weights not committed
+## Weights on Hugging Face Hub
 
-Training is a one-off development step, not part of the application runtime. The notebook lives in notebooks/train.py as a .py file with # %% cells,
-runnable in Colab as a notebook. best.pt is downloaded manually after training and placed at models/weights/, which is gitignored. This keeps the repository lightweight and the training environment separate from the application.
+Training is a one-off development step, not part of the application runtime. The notebook lives in notebooks/train_oreo.py as a .py file with # %% cells,
+runnable in Colab as a notebook. After training, best.pt is uploaded to Anahia/yolov8s-seg-oreo on the Hugging Face Hub rather than committed to the repo.
+
+Uploading to Hugging Face Hub is a clean choice — it is free, versioned, and the ultralytics API can load directly from an HF repo with one line instead of a local path:
+
+```python
+model = YOLO("Anahia/yolov8s-seg-oreo")
+```
+
+Ultralytics handles the download from HF Hub automatically on first run and caches it locally, so no manual download step is needed anywhere. The Docker container does not need the file baked in — it just downloads on startup. The repository stays lightweight and the training environment stays separate from the application.
+
+## MVP deployment: Colab plus local Docker
+
+The MVP deploys in two places: Google Colab for the public demo (Gradio with share=True) and local Docker with Gradio for development and manual testing. Both entrypoints load the same weights from Hugging Face Hub, so the only environment-specific configuration is the .env file.
 
 ## One model, multiple classes
 
