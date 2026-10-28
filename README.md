@@ -92,10 +92,7 @@ The Gradio interface runs on Google Colab with a public URL — no deployment ne
 
 ## Environment variables
 
-    # Training (notebooks/train_oreo.py)
     ROBOFLOW_API_KEY=
-
-    # Supabase (src/pipeline.py write_to_supabase)
     SUPABASE_URL=
     SUPABASE_KEY=
     DATABASE_URL=
