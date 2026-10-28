@@ -92,6 +92,21 @@ The Gradio interface runs on Google Colab with a public URL — no deployment ne
 
 ## Environment variables
 
+    # Training (notebooks/train_oreo.py)
+    ROBOFLOW_API_KEY=
+
+    # Supabase (src/pipeline.py write_to_supabase)
     SUPABASE_URL=
     SUPABASE_KEY=
     DATABASE_URL=
+
+## Scalability
+
+The current architecture uses supabase-py for all database operations (inserts and Storage uploads), which is sufficient for the PoC scope.
+
+For production or more complex reporting needs:
+
+- Connect via DATABASE_URL (session pooler) using SQLAlchemy or psycopg2 for direct SQL — aggregations across videos, complex joins, Alembic migrations
+- Replace the sequential frame-by-frame inference loop with batched inference for higher throughput
+- Move crop storage to a CDN-backed bucket and store only the URL in the detections table
+- Add a job queue (Celery, RQ) to process videos asynchronously instead of blocking the Gradio response
