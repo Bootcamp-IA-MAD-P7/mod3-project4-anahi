@@ -57,13 +57,14 @@ path simply adds a download step before processing.
 Training is a one-off development step, not part of the application runtime. The notebook lives in notebooks/train_oreo.py as a .py file with # %% cells,
 runnable in Colab as a notebook. After training, best.pt is uploaded to Anahia/yolov8s-seg-oreo on the Hugging Face Hub rather than committed to the repo.
 
-Uploading to Hugging Face Hub is a clean choice — it is free, versioned, and the ultralytics API can load directly from an HF repo with one line instead of a local path:
+Uploading to Hugging Face Hub is a clean choice — it is free, versioned, and the weights can be pulled programmatically at startup instead of committing binaries to the repo. Ultralytics itself has no Hugging Face integration, so the pipeline uses huggingface_hub, the official client:
 
 ```python
-model = YOLO("Anahia/yolov8s-seg-oreo")
+model_path = hf_hub_download(repo_id="Anahia/yolov8s-seg-oreo", filename="best.pt")
+model = YOLO(model_path)
 ```
 
-Ultralytics handles the download from HF Hub automatically on first run and caches it locally, so no manual download step is needed anywhere. The Docker container does not need the file baked in — it just downloads on startup. The repository stays lightweight and the training environment stays separate from the application.
+huggingface_hub downloads the weights on first run and caches them locally, so no manual download step is needed anywhere. The Docker container does not need the file baked in — it just downloads on startup. The repository stays lightweight and the training environment stays separate from the application.
 
 ## MVP deployment: Colab plus local Docker
 

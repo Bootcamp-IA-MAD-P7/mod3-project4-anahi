@@ -15,10 +15,14 @@
 ## Loading the Model
 
 ```python
-model = YOLO("Anahia/yolov8s-seg-oreo")
+from huggingface_hub import hf_hub_download
+from ultralytics import YOLO
+
+model_path = hf_hub_download(repo_id="Anahia/yolov8s-seg-oreo", filename="best.pt")
+model = YOLO(model_path)
 ```
 
-Ultralytics downloads and caches the weights automatically on first run. No manual
+huggingface_hub downloads the weights on first run and caches them. No manual
 download required.
 
 ## Validation Metrics at Best Checkpoint

@@ -25,7 +25,7 @@ by retraining with additional classes.
 - Architecture: YOLOv8s-seg (ultralytics)
 - Pre-trained weights: yolov8s-seg.pt (COCO)
 - Fine-tuned on: Oreo dataset
-- Fine-tuned weights: In Hugging Face Hub, loaded via `YOLO("Anahia/yolov8s-seg-oreo")`, downloaded and cached on first run
+- Fine-tuned weights: In Hugging Face Hub, loaded via `hf_hub_download(repo_id="Anahia/yolov8s-seg-oreo", filename="best.pt")` then `YOLO(path)`, downloaded and cached on first run
 - Training environment: Google Colab (T4 GPU)
 - Epochs: 100
 - Early stopping patience: 10
