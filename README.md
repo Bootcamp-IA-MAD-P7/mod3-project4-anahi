@@ -107,3 +107,9 @@ For production or more complex reporting needs:
 - Replace the sequential frame-by-frame inference loop with batched inference for higher throughput
 - Move crop storage to a CDN-backed bucket and store only the URL in the detections table
 - Add a job queue (Celery, RQ) to process videos asynchronously instead of blocking the Gradio response
+
+## Documentation
+
+- [Project Specifications](docs/specs.md)
+- [Architecture Decisions](docs/architecture.md)
+- [Training Results](docs/train.md)
