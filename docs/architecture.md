@@ -85,3 +85,7 @@ Processing every frame on CPU is not feasible in reasonable time. Every 5th fram
 ## Python 3.13
 
 Ultralytics fixed Python 3.13 pathlib and checkpoint compatibility in v8.4.99 (July 2026). Python 3.13 is safe to use and is the current stable release, so it is the natural choice.
+
+## Testing
+
+Unit tests with synthetic video were skipped — the model is trained on real Oreo images and produces no detections on blank frames. Mocking the model was considered but adds maintenance overhead for a PoC. End-to-end testing is done manually with real video through the Gradio interface.

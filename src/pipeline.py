@@ -1,6 +1,7 @@
 import os
 import re
 from collections import defaultdict
+from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -16,6 +17,7 @@ WEIGHTS_FILENAME = "best.pt"
 DEFAULT_FRAME_INTERVAL = 5
 DEFAULT_CONF_THRESHOLD = 0.5
 DEFAULT_GAP_TOLERANCE = 5
+DEFAULT_BATCH_SIZE = 8
 TMP_DIR = Path("/tmp")
 CROPS_ROOT = TMP_DIR / "crops"
 STORAGE_BUCKET = "crops"
@@ -231,6 +233,119 @@ def process_video(
     intervals = group_intervals(detections, gap_tolerance)
     extract_crops(video_path, video_name, intervals)
     return build_report(video_name, metadata, intervals, frame_interval)
+
+
+def stream_video(
+    source: str,
+    frame_interval: int = DEFAULT_FRAME_INTERVAL,
+    conf_threshold: float = DEFAULT_CONF_THRESHOLD,
+    gap_tolerance: int = DEFAULT_GAP_TOLERANCE,
+    batch_size: int = DEFAULT_BATCH_SIZE,
+) -> Generator[dict]:
+    video_path = resolve_video_path(source)
+    video_name = re.sub(r"[^\w\-]", "_", video_path.stem)
+    metadata = read_video_metadata(video_path)
+    model = load_model()
+    fps = metadata["fps"]
+    total_frames = metadata["total_frames"]
+
+    open_intervals: dict[str, dict] = {}
+    counters: dict[str, int] = defaultdict(int)
+    closed_intervals: list[dict] = []
+
+    def apply_batch(batch_frames: list, batch_indices: list[int]) -> None:
+        results = model.predict(batch_frames, conf=conf_threshold, verbose=False)
+        for frame_index, frame, result in zip(batch_indices, batch_frames, results):
+            timestamp = frame_index / fps
+            for box in result.boxes:
+                x1, y1, x2, y2 = (int(v) for v in box.xyxy[0].tolist())
+                class_name = model.names[int(box.cls[0])]
+                confidence = float(box.conf[0])
+                interval = open_intervals.get(class_name)
+                if interval is None:
+                    open_intervals[class_name] = {
+                        "class_name": class_name,
+                        "first_frame_index": frame_index,
+                        "last_frame_index": frame_index,
+                        "start_timestamp": timestamp,
+                        "end_timestamp": timestamp,
+                        "peak_confidence": confidence,
+                        "peak_frame_index": frame_index,
+                        "peak_bbox": (x1, y1, x2, y2),
+                        "peak_frame_crop": frame,
+                    }
+                else:
+                    interval["last_frame_index"] = frame_index
+                    interval["end_timestamp"] = timestamp
+                    if confidence > interval["peak_confidence"]:
+                        interval["peak_confidence"] = confidence
+                        interval["peak_frame_index"] = frame_index
+                        interval["peak_bbox"] = (x1, y1, x2, y2)
+                        interval["peak_frame_crop"] = frame
+
+    def close_interval(class_name: str) -> dict:
+        interval = open_intervals.pop(class_name)
+        interval_id = f"{class_name}_{counters[class_name]}"
+        counters[class_name] += 1
+        x1, y1, x2, y2 = interval["peak_bbox"]
+        crop = interval["peak_frame_crop"][y1:y2, x1:x2]
+        crop_path = CROPS_ROOT / video_name / f"{interval_id}.jpg"
+        crop_path.parent.mkdir(parents=True, exist_ok=True)
+        if not cv2.imwrite(str(crop_path), crop):
+            raise RuntimeError(f"Failed to write crop: {crop_path}")
+        interval["interval_id"] = interval_id
+        interval["crop_path"] = str(crop_path)
+        closed_intervals.append(interval)
+        return {
+            "interval_id": interval_id,
+            "start_time": interval["start_timestamp"],
+            "end_time": interval["end_timestamp"],
+            "duration": max(
+                interval["end_timestamp"] - interval["start_timestamp"],
+                frame_interval / fps,
+            ),
+            "peak_confidence": interval["peak_confidence"],
+            "crop_path": str(crop_path),
+        }
+
+    def close_expired(last_frame_index: int) -> Generator[dict]:
+        for class_name in list(open_intervals):
+            if (
+                last_frame_index - open_intervals[class_name]["last_frame_index"]
+                > gap_tolerance
+            ):
+                yield {"type": "interval", "data": close_interval(class_name)}
+
+    cap = cv2.VideoCapture(str(video_path))
+    try:
+        batch_frames: list = []
+        batch_indices: list[int] = []
+        for frame_index in range(0, total_frames, frame_interval):
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+            ok, frame = cap.read()
+            if not ok:
+                continue
+            batch_frames.append(frame)
+            batch_indices.append(frame_index)
+            if len(batch_frames) < batch_size:
+                continue
+            apply_batch(batch_frames, batch_indices)
+            yield from close_expired(batch_indices[-1])
+            batch_frames = []
+            batch_indices = []
+        if batch_frames:
+            apply_batch(batch_frames, batch_indices)
+    finally:
+        cap.release()
+
+    for class_name in list(open_intervals):
+        yield {"type": "interval", "data": close_interval(class_name)}
+
+    closed_intervals.sort(key=lambda iv: (iv["start_timestamp"], iv["class_name"]))
+    yield {
+        "type": "report",
+        "data": build_report(video_name, metadata, closed_intervals, frame_interval),
+    }
 
 
 def write_to_supabase(report: dict) -> None:
