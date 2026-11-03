@@ -241,11 +241,12 @@ def stream_video(
     conf_threshold: float = DEFAULT_CONF_THRESHOLD,
     gap_tolerance: int = DEFAULT_GAP_TOLERANCE,
     batch_size: int = DEFAULT_BATCH_SIZE,
+    model: YOLO | None = None,
 ) -> Generator[dict]:
     video_path = resolve_video_path(source)
     video_name = re.sub(r"[^\w\-]", "_", video_path.stem)
     metadata = read_video_metadata(video_path)
-    model = load_model()
+    model = model or load_model()
     fps = metadata["fps"]
     total_frames = metadata["total_frames"]
 

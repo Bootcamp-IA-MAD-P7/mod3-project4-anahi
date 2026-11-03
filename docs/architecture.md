@@ -89,3 +89,11 @@ Ultralytics fixed Python 3.13 pathlib and checkpoint compatibility in v8.4.99 (J
 ## Testing
 
 Unit tests with synthetic video were skipped — the model is trained on real Oreo images and produces no detections on blank frames. Mocking the model was considered but adds maintenance overhead for a PoC. End-to-end testing is done manually with real video through the Gradio interface.
+
+## Report Format
+
+Reports are generated as Markdown. Markdown needs no extra library at runtime — the report is built with plain string formatting — and stays human-readable when opened as text. It is also trivially convertible to PDF in a future iteration using pandoc or weasyprint, so the current format does not lock the project into a rendering stack.
+
+## Scalability
+
+The localStorage history currently stores text only: each past analysis keeps the Markdown report and metadata, not the crop images. A future improvement is to fetch Supabase Storage signed URLs on demand when a past report is expanded, so crop images can be displayed alongside the stored text without bloating localStorage.
