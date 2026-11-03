@@ -29,13 +29,12 @@ Built as a proof of concept for an advertising agency use case: given a video, i
 ## Project structure
 
 brand-detection/
+├── app.py                # Gradio interface
 ├── src/
-│   ├── detect.py
-│   ├── database.py
-│   ├── report.py
-│   └── app.py
+│   └── pipeline.py       # detection, reporting, Supabase writes
 ├── notebooks/
-│   └── train_oreo.py    # dataset download + training
+│   ├── train_oreo.py    # dataset download + training
+│   └── inference.py     # batch inference
 ├── outputs/
 │   └── crops/            
 ├── docs/

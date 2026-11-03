@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports:
+      - "7860:7860"
+    env_file:
+      - .env
+    volumes:
+      - /tmp/crops:/tmp/crops
+      - /tmp/oreo_reports:/tmp/oreo_reports
