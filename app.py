@@ -41,22 +41,79 @@ theme = gr.themes.Base(
     primary_hue=_PRIMARY,
     neutral_hue=_NEUTRAL,
     font=[
-        gr.themes.GoogleFont("Playfair Display"),
         gr.themes.GoogleFont("Inter"),
+        gr.themes.GoogleFont("Playfair Display"),
         "ui-sans-serif",
         "sans-serif",
     ],
     font_mono=[gr.themes.GoogleFont("Inter"), "ui-monospace", "monospace"],
 ).set(
     body_background_fill="#f3e2d0",
+    body_background_fill_dark="#f3e2d0",
     button_primary_background_fill="#c9714d",
     button_primary_background_fill_hover="#b55937",
     color_accent="#b55937",
-    body_text_color="#511407",
-    block_label_text_color="#511407",
+    body_text_color="#b55937",
+    body_text_color_dark="#b55937",
+    block_label_text_color="#b55937",
+    block_label_text_color_dark="#b55937",
+    button_large_text_weight="400",
+    button_large_text_size="14px",
+    button_medium_text_weight="400",
+    button_medium_text_size="12px",
 )
 
-CSS = "#results-scroll { max-height: 600px; overflow-y: auto; padding-right: 8px; }"
+CSS = (
+    "body, .gradio-container { background: #f3e2d0 !important; } "
+    ".gradio-container { position: relative !important; } "
+    "#app-title, #app-title h1 { font-family: 'Playfair Display', serif !important; "
+    "color: #9a4a2e !important; } "
+    "#logo-block { position: static !important; padding: 0 !important; "
+    "margin: 0 !important; background: transparent !important; "
+    "border: none !important; } "
+    ".flower-logo { position: absolute; top: 16px; right: -20px; width: 146px; "
+    "height: auto; z-index: 1000; pointer-events: none; } "
+    "#url-card, #url-card .block { "
+    "background: #586745 !important; border-color: #586745 !important; } "
+    "#url-card textarea, #url-card input { "
+    "background: #a3b18a !important; color: #ffffff !important; "
+    "border-color: #a3b18a !important; } "
+    "#url-card label, #url-card .block-label, #url-card label span { "
+    "color: #ffffff !important; } "
+    "#url-card textarea::placeholder { color: #ffffff !important; } "
+    "#upload-btn { display: flex !important; justify-content: center !important; } "
+    "#upload-btn, #upload-btn button { background: #586745 !important; "
+    "color: #ffffff !important; border-color: #586745 !important; "
+    "justify-content: center !important; } "
+    "#results-scroll { "
+    "background: transparent !important; "
+    "border: 2px solid #a3b18a; "
+    "border-radius: 12px; "
+    "padding: 16px 20px; "
+    "margin-top: 8px; "
+    "min-height: calc(100vh - 360px); "
+    "overflow-y: auto; "
+    "color: #3f4e2e; "
+    "} "
+    "#results-scroll > .block, #results-scroll .html-container { "
+    "background: transparent !important; border: none !important; }"
+)
+
+LOGO_PATH = "public/flower-logo.png"
+
+_JS_FORCE_LIGHT = """
+() => {
+    const fix = () => {
+        document.body.classList.remove('dark');
+        document.documentElement.classList.remove('dark');
+    };
+    fix();
+    new MutationObserver(fix).observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+}
+"""
 
 SAGE = "#a3b18a"
 CARD = (
@@ -221,10 +278,16 @@ def analyse(url: str, video_path: str | None):
     )
 
 
-with gr.Blocks(theme=theme, title="Oreo Visibility Analysis", css=CSS) as demo:
-    gr.Markdown("# Oreo Visibility Analysis")
+with gr.Blocks(title="Oreo Visibility Analysis") as demo:
+    gr.HTML(
+        elem_id="logo-block",
+        value=f'<img class="flower-logo" '
+        f'src="data:image/png;base64,{_b64(LOGO_PATH)}" alt="Flower logo">',
+    )
+    gr.Markdown("# Oreo Visibility Analysis", elem_id="app-title")
     gr.Markdown(
-        "Automated detection and reporting of brand appearances in video content."
+        "Automated detection and reporting of brand appearances in video content",
+        elem_id="app-subtitle",
     )
 
     with gr.Tabs():
@@ -236,11 +299,13 @@ with gr.Blocks(theme=theme, title="Oreo Visibility Analysis", css=CSS) as demo:
                     placeholder="Paste a video URL",
                     label="Video URL",
                     scale=3,
+                    elem_id="url-card",
                 )
                 upload_btn = gr.UploadButton(
                     "Upload video",
                     file_types=["video"],
                     scale=1,
+                    elem_id="upload-btn",
                 )
 
             analyse_btn = gr.Button("Analyse", variant="primary")
@@ -283,6 +348,7 @@ with gr.Blocks(theme=theme, title="Oreo Visibility Analysis", css=CSS) as demo:
             refresh_btn.click(fn=None, outputs=history_html, js=_JS_READ)
             clear_btn.click(fn=None, outputs=history_html, js=_JS_CLEAR)
             demo.load(fn=None, outputs=history_html, js=_JS_READ)
+    demo.load(fn=None, js=_JS_FORCE_LIGHT)
 
 if __name__ == "__main__":
-    demo.launch(share=True, server_name="0.0.0.0")
+    demo.launch(theme=theme, css=CSS, share=True, server_name="0.0.0.0")
