@@ -10,9 +10,9 @@ Additionally, YOLOv8 has significantly more community resources, solved problems
 
 Both models use the identical ultralytics Python API, so switching to YOLO26 in a future iteration with a larger dataset costs one line of code.
 
-## Model size: small (s) over nano (n)
+## Model size: small (s) 
 
-YOLOv8n is used first to verify the pipeline runs end to end without errors. YOLOv8s is the actual training target. It has enough capacity to learn logo shapes reliably without overfitting a small dataset. Larger variants (m, l, x) would be overparameterized for 114 images and offer no accuracy benefit.
+YOLOv8s has enough capacity to learn logo shapes reliably without overfitting a small dataset. Larger variants (m, l, x) would be overparameterized for 114 images and offer no accuracy benefit.
 
 ## Early stopping with patience=10
 
